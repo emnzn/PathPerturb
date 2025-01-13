@@ -1,0 +1,12 @@
+encoder: uni
+batch_size: 100
+
+# augmentations
+brightness_min: -100
+brightness_max: 100
+
+contrast_min: -100
+contrast_max: 100
+
+saturation_min: -100
+saturation_max: 100
