@@ -54,10 +54,11 @@ def main():
         transforms.ToTensor()
     ])
 
-    dest_dir = os.path.join("..", "assets", "embeddings")
     encoder_dir = os.path.join("..", "assets", "pre-trained-weights")
-    
-    dataset = PCAM(data_dir, split="train", transform=base_transform)
+    dest_dir = os.path.join("..", "assets", "embeddings", args["data_split"], args["encoder"])
+    os.makedirs(dest_dir, exist_ok=True)
+
+    dataset = PCAM(data_dir, split=args["data_split"], transform=base_transform)
     dataloader = DataLoader(dataset, batch_size=args["batch_size"])
     
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -91,8 +92,8 @@ def main():
         "hue": hue_range
     }
 
-    for aug in augmentation_array:
-        aug_range = augmentation_array["aug"]
+    for aug in augmentation_array.keys():
+        aug_range = augmentation_array[aug]
 
         for strength in aug_range:
             if aug == "brightness":
@@ -119,9 +120,9 @@ def main():
                     transforms.ToTensor()
                 ])
 
-            dataset = PCAM(data_dir, split="train", transform=transform)
+            dataset = PCAM(data_dir, split=args["data_split"], transform=transform)
             dataloader = DataLoader(dataset, batch_size=args["batch_size"])
-            get_embeddings(encoder, dataloader, device, os.path.join(dest_dir, f"{aug}.parquet"))
+            get_embeddings(encoder, dataloader, device, os.path.join(dest_dir, f"{aug}-{strength}.parquet"))
 
 if __name__ == "__main__":
     main()

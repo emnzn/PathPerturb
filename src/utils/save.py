@@ -18,4 +18,5 @@ def save_embeddings(
     """
 
     df = pd.DataFrame(results)
+    df["image"] = df["image"].map(lambda x: x.flatten())
     df.to_parquet(save_dir, index=False)
