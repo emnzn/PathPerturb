@@ -3,4 +3,5 @@ data/
 *.sh
 *.pth
 *.log
+*.parquet
 __pycache__/

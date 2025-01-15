@@ -55,7 +55,7 @@ def main():
     ])
 
     encoder_dir = os.path.join("..", "assets", "pre-trained-weights")
-    dest_dir = os.path.join("..", "assets", "embeddings", args["data_split"], args["encoder"])
+    dest_dir = os.path.join("..", "data", "embeddings", args["data_split"], args["encoder"])
     os.makedirs(dest_dir, exist_ok=True)
 
     dataset = PCAM(data_dir, split=args["data_split"], transform=base_transform)

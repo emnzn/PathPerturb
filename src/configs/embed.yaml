@@ -1,13 +1,13 @@
 encoder: uni
-batch_size: 10000
+batch_size: 100
 data_split: val
 
 # augmentations
-brightness_min: 0
-brightness_max: 100
+brightness_min: 0 # [0, inf)
+brightness_max: 100 
 
-contrast_min: 0
-contrast_max: 100
+contrast_min: 0 # [0, inf)
+contrast_max: 100 
 
-saturation_min: -50
-saturation_max: 50
+saturation_min: 0 # [0, inf)
+saturation_max: 100 
