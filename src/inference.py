@@ -20,12 +20,33 @@ from utils import (
 
 @torch.no_grad()
 def inference(
-    dataloader,
-    criterion,
-    model,
-    device,
-    save_dir
+    dataloader: DataLoader,
+    criterion: nn.Module,
+    model: Network,
+    device: str,
+    save_dir: str
     ):
+
+    """
+    Runs inference on a given model.
+
+    Parameters
+    ----------
+    dataloader: DataLoader
+        The data loader to iterate over.
+
+    criterion: nn.Module
+        The loss function.
+
+    model: Network
+        The model to be trained.
+
+    device: str
+        One of [cuda, cpu].
+
+    save_dir: str
+        The directory to save the results.
+    """
     
     metrics = {
         "image": [],

@@ -2,7 +2,6 @@ import yaml
 from typing import Dict, Union
 
 import numpy as np
-import torchvision.transforms as transforms
 
 def get_args(arg_path: str) -> Dict[str, Union[float, str]]:
     """
@@ -24,7 +23,21 @@ def get_args(arg_path: str) -> Dict[str, Union[float, str]]:
 
     return args
 
-def get_transform_range(args: Dict[str, Union[float, str]]):
+def get_transform_range(args: Dict[str, Union[float, str]]) -> np.ndarray:
+    """
+    Gets the range of transformation intensities to iterate over.
+
+    Parameters
+    ----------
+    args: Dict[str, Union[float, str]]
+        The inference arguments.
+
+    Returns
+    -------
+    transform_range: np.ndarray
+        The range of transformation intensities to be applied to the dataset.
+    """
+
     step = args["augmentation_step"]
     maximum = args["augmentation_max"]
     minimum = args["augmentation_min"]

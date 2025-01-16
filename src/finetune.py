@@ -1,5 +1,6 @@
 import os
 from math import inf
+from typing import Tuple
 
 import torch
 import torch.nn as nn
@@ -17,12 +18,41 @@ from utils import (
     )
 
 def train(
-    dataloader,
-    criterion,
-    optimizer, 
-    model,
-    device
-    ):
+    dataloader: DataLoader,
+    criterion: nn.Module,
+    optimizer: torch.optim.Optimizer, 
+    model: Network,
+    device: str
+    ) -> Tuple[float, float]:
+
+    """
+    Trains the model for one epoch.
+
+    Parameters
+    ----------
+    dataloader: DataLoader
+        The data loader to iterate over.
+
+    criterion: nn.Module
+        The loss function.
+
+    optimizer: optim.Optimizer
+        The optimizer for parameter updates.
+
+    model: Network
+        The model to be trained.
+
+    device: str
+        One of [cuda, cpu].
+
+    Returns
+    -------
+    epoch_loss: float
+        The average loss for the given epoch.
+
+    epoch_balanced_accuracy: float
+        The average balanced accuracy for the given epoch.  
+    """
 
     metrics = {
         "running_loss": 0,
@@ -56,11 +86,15 @@ def train(
 
 @torch.no_grad()
 def validate(
-    dataloader,
-    criterion,
-    model,
-    device
+    dataloader: DataLoader,
+    criterion: nn.Module,
+    model: Network,
+    device: str
     ):
+
+    """
+    Runs validation for a single epoch.
+    """
     
     metrics = {
         "running_loss": 0,

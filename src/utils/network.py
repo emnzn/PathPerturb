@@ -4,9 +4,30 @@ import timm
 import torch
 import torch.nn as nn
 from timm.layers import SwiGLUPacked
+from timm.models.vision_transformer import VisionTransformer 
 
 
 class Network(nn.Module):
+    """
+    Initializes the network with the foundation model as the encoder
+    and a linear layer as the classifier.
+
+    Parameters
+    ----------
+    encoder: str
+        The foundation model to be used as the encoder.
+        One of [uni, gigapath, virchow].
+
+    encoder_dir: str
+        The directory containing the encoder weights.
+
+    num_classes: int
+        The number of classes to be classified.
+    
+    freeze_encoder: bool
+        Whether to freeze the encoder during finetuning.
+    """
+
     def __init__(
         self,
         encoder: str,
@@ -35,6 +56,18 @@ def download_weights(
     encoder: str,
     encoder_dir: str
     ):
+    """
+    Downloads the weights of a foundation model to a selected directory.
+
+    Parameters
+    ----------
+    encoder: str
+        The foundation model to be used as the encoder.
+        One of [uni, gigapath, virchow].
+
+    encoder_dir: str
+        The directory containing the encoder weights.
+    """
 
     valid_encoders = [
         "uni",
@@ -63,7 +96,27 @@ def get_encoder(
     encoder: str,
     encoder_dir: str,
     device: str
-    ):
+    ) -> VisionTransformer:
+    """
+    Returns an initialized foundation encoder.
+
+    Parameters
+    ----------
+    encoder: str
+        The foundation model to be used as the encoder.
+        One of [uni, gigapath, virchow].
+
+    encoder_dir: str
+        The directory containing the encoder weights.
+
+    device: str
+        The device to map the weights onto.
+
+    Returns
+    -------
+    encoder: VisionTransformer
+        The initialized foundation encoder.
+    """
 
     valid_encoders = [
         "uni",
@@ -90,6 +143,19 @@ def get_encoder(
     return encoder
 
 class ClassificationHead(nn.Module):
+    """
+    Initializes a linear classification head.
+
+    Parameters
+    ----------
+    in_dim: int
+        The input dimension of the classifier.
+
+    out_dim: int
+        The output dimension of the classifier or 
+        the number of classes.
+    """
+
     def __init__(self, in_dim, out_dim):
         super().__init__()
         self.head = nn.Linear(in_dim, out_dim)
@@ -103,6 +169,20 @@ def get_classification_head(
     encoder: str,
     num_classes: int
     ) -> ClassificationHead:
+    """
+    Initializes the appropriate classification head
+    according to a selected foundation encoder.
+
+    Parameters
+    ----------
+    encoder: str
+        The foundation model to be used as the encoder.
+        One of [uni, gigapath, virchow].
+
+    num_classes: int
+        The number of output classes.
+    """
+
 
     valid_encoders = [
         "uni",
