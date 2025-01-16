@@ -1,7 +1,7 @@
 # Foundation Model Robustness Study for Computational Pathology
 
 <p align="center">
-    <img src="assets/graphs/Preliminary-Results.png" alt="preliminary-results" style="border-radius: 8px; width: 95%;">
+    <img src="assets/graphs/Preliminary-Results-Accuracy.png" alt="preliminary-results" style="border-radius: 8px; width: 95%;">
 </p>
 
 ## Overview
