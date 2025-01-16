@@ -39,7 +39,7 @@ learning_rate: 1.0e-4
 ## Fine-tune
 Enter the `src` directory and run:
 ```bash
-finetune.py
+python finetune.py
 ```
 
 ## Inference Configuration
