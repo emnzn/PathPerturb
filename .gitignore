@@ -1,5 +1,6 @@
 data/
 .env
+/*.py
 *.sh
 *.pth
 *.log
