@@ -1,5 +1,9 @@
 # Foundation Model Robustness Study for Computational Pathology
 
+<p align="center">
+    <img src="assets/graphs/Preliminary-Results.png" alt="preliminary-results" style="border-radius: 8px; width: 95%;">
+</p>
+
 ## Overview
 This repository evaluates the robustness of foundation models in computational pathology against image distortions.
 
