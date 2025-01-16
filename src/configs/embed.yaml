@@ -1,6 +1,7 @@
 encoder: uni
 batch_size: 100
-data_split: val
+data_split: train
+apply_augmentation_range: false
 
 # augmentations
 brightness_min: 0 # [0, inf)

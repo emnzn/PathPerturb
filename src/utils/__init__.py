@@ -1,4 +1,4 @@
 from .save import *
-from .encoder import *
+from .network import *
 from .dataset import *
 from .argparser import *

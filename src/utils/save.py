@@ -3,7 +3,7 @@ from typing import Dict, Union
 import numpy as np
 import pandas as pd
 
-def save_embeddings(
+def save_results(
     results: Dict[str, Union[str, np.ndarray]],
     save_dir: int
     ) -> None:

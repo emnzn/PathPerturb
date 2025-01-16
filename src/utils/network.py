@@ -2,7 +2,34 @@ import os
 
 import timm
 import torch
+import torch.nn as nn
 from timm.layers import SwiGLUPacked
+
+
+class Network(nn.Module):
+    def __init__(
+        self,
+        encoder: str,
+        encoder_dir: str,
+        num_classes: int,
+        freeze_encoder: bool = True
+        ):
+        super().__init__()
+
+        self.encoder = get_encoder(encoder, encoder_dir, "cpu")
+        self.fc = get_classification_head(encoder, num_classes)
+
+        if freeze_encoder:
+            for param in self.encoder.parameters():
+                param.requires_grad = False
+            
+            self.encoder.eval()
+
+    def forward(self, x):
+        embedding = self.encoder(x)
+        logits = self.fc(embedding)
+
+        return logits, embedding
 
 def download_weights(
     encoder: str,
@@ -61,3 +88,37 @@ def get_encoder(
     encoder = torch.load(encoder_path, map_location=torch.device(device))
 
     return encoder
+
+class ClassificationHead(nn.Module):
+    def __init__(self, in_dim, out_dim):
+        super().__init__()
+        self.head = nn.Linear(in_dim, out_dim)
+
+    def forward(self, x):
+        logits = self.head(x)
+
+        return logits
+    
+def get_classification_head(
+    encoder: str,
+    num_classes: int
+    ) -> ClassificationHead:
+
+    valid_encoders = [
+        "uni",
+        "gigapath",
+        "virchow"
+    ]
+
+    assert encoder in valid_encoders, f"encoder must be one of {valid_encoders}"
+
+    if encoder == "uni":
+        head = ClassificationHead(in_dim=1024, out_dim=num_classes)
+
+    if encoder == "gigapath":
+        head = ClassificationHead(in_dim=1536, out_dim=num_classes)
+
+    if encoder == "virchow":
+        head = ClassificationHead(in_dim=1280, out_dim=num_classes)
+
+    return head
