@@ -23,7 +23,8 @@ def train(
     criterion: nn.Module,
     optimizer: torch.optim.Optimizer, 
     model: Network,
-    device: str
+    device: str,
+    use_amp: bool
     ) -> Tuple[float, float]:
 
     """
@@ -45,6 +46,8 @@ def train(
 
     device: str
         One of [cuda, cpu].
+
+    use
 
     Returns
     -------
@@ -143,7 +146,7 @@ def main():
         split="train", 
         data_dir=data_dir
         )
-        
+    
     val_dataset = get_dataset(
         name=args["dataset"], 
         split="val" if args["dataset"] != "gleason-grading" else "test", 
@@ -154,6 +157,7 @@ def main():
     val_loader = DataLoader(val_dataset, batch_size=args["batch_size"], shuffle=False)
     
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    use_amp = device == "cuda"
     model = Network(args["encoder"], encoder_dir, args["num_classes"], args["freeze_encoder"]).to(device)
 
     criterion = nn.CrossEntropyLoss()
@@ -170,7 +174,8 @@ def main():
             criterion=criterion, 
             optimizer=optimizer, 
             model=model, 
-            device=device
+            device=device,
+            use_amp=use_amp
             )
         
         log_metrics(
