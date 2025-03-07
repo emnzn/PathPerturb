@@ -14,6 +14,7 @@ from utils import (
     get_args,
     save_args,
     get_dataset,
+    log_metrics,
     Network
     )
 
@@ -141,7 +142,8 @@ def main():
         name=args["dataset"], 
         split="train", 
         data_dir=data_dir
-    )
+        )
+        
     val_dataset = get_dataset(
         name=args["dataset"], 
         split="val" if args["dataset"] != "gleason-grading" else "test", 
@@ -163,21 +165,36 @@ def main():
     for epoch in range(1, args["epochs"] + 1):
         print(f"Epoch [{epoch}/{args['epochs']}]")
         
-        train_loss, train_accuracy = train(train_loader, criterion, optimizer, model, device)
+        train_loss, train_accuracy = train(
+            dataloader=train_loader, 
+            criterion=criterion, 
+            optimizer=optimizer, 
+            model=model, 
+            device=device
+            )
         
-        print("Train Statistics:")
-        print(f"Loss: {train_loss:.4f} | Balanced Accuracy: {train_accuracy:.4f}\n")
+        log_metrics(
+            writer=writer,
+            loss=train_loss,
+            prefix="Train",
+            epoch=epoch,
+            performance=train_accuracy
+            )
 
-        writer.add_scalar("Train/Loss", train_loss, epoch)
-        writer.add_scalar("Train/Balanced-Accuracy", train_accuracy, epoch)
-
-        val_loss, val_accuracy = validate(val_loader, criterion, model, device)
+        val_loss, val_accuracy = validate(
+            dataloader=val_loader, 
+            criterion=criterion, 
+            model=model, 
+            device=device
+            )
         
-        print("Validation Statistics:")
-        print(f"Loss: {val_loss:.4f} | Balanced Accuracy: {val_accuracy:.4f}\n")
-
-        writer.add_scalar("Validation/Loss", val_loss, epoch)
-        writer.add_scalar("Validation/Accuracy", val_accuracy, epoch)
+        log_metrics(
+            writer=writer,
+            loss=val_loss,
+            prefix="Validation",
+            epoch=epoch,
+            performance=val_accuracy
+            )
 
         if val_loss < min_val_loss:
             torch.save(model.state_dict(), os.path.join(model_dir, f"lowest-loss.pth"))

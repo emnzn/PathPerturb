@@ -6,7 +6,6 @@ import torch.nn as nn
 from timm.layers import SwiGLUPacked
 from timm.models.vision_transformer import VisionTransformer 
 
-
 class Network(nn.Module):
     """
     Initializes the network with the foundation model as the encoder
@@ -139,7 +138,7 @@ def get_encoder(
     if not os.path.isfile(encoder_path):
         download_weights(encoder, encoder_dir=encoder_dir)
 
-    encoder = torch.load(encoder_path, map_location=torch.device(device))
+    encoder = torch.load(encoder_path, map_location=torch.device(device), weights_only=False)
 
     return encoder
 
