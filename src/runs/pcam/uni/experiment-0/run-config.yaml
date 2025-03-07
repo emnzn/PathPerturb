@@ -1,12 +1,12 @@
+dataset: pcam
 experiment_num: 0
-dataset: gleason-grading
 
 encoder: uni
-num_classes: 5
+num_classes: 2
 freeze_encoder: true
 
-epochs: 10
-batch_size: 8
+epochs: 50
+batch_size: 100
 eta_min: 1.0e-6
 weight_decay: 0.0
 learning_rate: 1.0e-4

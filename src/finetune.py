@@ -6,14 +6,14 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 import torch.nn.functional as F
-from torchvision.datasets import PCAM
 from torch.utils.data import DataLoader
-import torchvision.transforms as transforms
 from torch.utils.tensorboard import SummaryWriter
 from sklearn.metrics import balanced_accuracy_score
 
 from utils import (
     get_args,
+    save_args,
+    get_dataset,
     Network
     )
 
@@ -61,7 +61,7 @@ def train(
     }
     
     model.train()
-    for img, target in tqdm(dataloader, desc="Training in progress"):
+    for img, target, *_ in tqdm(dataloader, desc="Training in progress"):
         img = img.to(device)
         target =  target.to(device)
 
@@ -103,7 +103,7 @@ def validate(
     }
 
     model.eval()
-    for img, target in tqdm(dataloader, desc="Validation in progress"):
+    for img, target, *_ in tqdm(dataloader, desc="Validation in progress"):
         img = img.to(device)
         target = target.to(device)
 
@@ -128,19 +128,25 @@ def main():
     args = get_args(arg_path)
 
     data_dir = os.path.join("..", "data")
-    encoder_dir = os.path.join("..", "assets", "pre-trained-weights")
-    log_dir = os.path.join("runs", args["encoder"])
+    encoder_dir = os.path.join("..", "assets", "model-weights", "pre-trained-weights")
     
-    model_dir = os.path.join("..", "assets", "finetune-weights", args["encoder"])
+    log_dir = os.path.join("runs", args["dataset"], args["encoder"], f"experiment-{args['experiment_num']}")
+    writer = SummaryWriter(log_dir)
+    save_args(args, log_dir)
+    
+    model_dir = os.path.join("..", "assets", "model-weights", "finetune-weights", args["dataset"], args["encoder"], f"experiment-{args['experiment_num']}")
     os.makedirs(model_dir, exist_ok=True)
 
-    base_transform = transforms.Compose([
-        transforms.ToTensor()
-    ])
-
-    writer = SummaryWriter(log_dir)
-    train_dataset = PCAM(data_dir, split="train", transform=base_transform)
-    val_dataset = PCAM(data_dir, split="val", transform=base_transform)
+    train_dataset = get_dataset(
+        name=args["dataset"], 
+        split="train", 
+        data_dir=data_dir
+    )
+    val_dataset = get_dataset(
+        name=args["dataset"], 
+        split="val" if args["dataset"] != "gleason-grading" else "test", 
+        data_dir=data_dir
+        )
 
     train_loader = DataLoader(train_dataset, batch_size=args["batch_size"], shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=args["batch_size"], shuffle=False)

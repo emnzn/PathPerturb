@@ -125,6 +125,7 @@ def get_encoder(
     ]
 
     assert encoder in valid_encoders, f"encoder must be one of {valid_encoders}"
+    os.makedirs(encoder_dir, exist_ok=True)
 
     if encoder == "uni":
         encoder_path = os.path.join(encoder_dir, "uni.pth")
@@ -136,7 +137,7 @@ def get_encoder(
         encoder_path = os.path.join(encoder_dir, "virchow.pth")
 
     if not os.path.isfile(encoder_path):
-        download_weights(encoder)
+        download_weights(encoder, encoder_dir=encoder_dir)
 
     encoder = torch.load(encoder_path, map_location=torch.device(device))
 
