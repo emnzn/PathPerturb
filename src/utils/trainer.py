@@ -6,12 +6,50 @@ from tqdm import tqdm
 from torch.amp import GradScaler
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
+from deeplake import Dataset as DeepLakeDataset
 from torch.optim.lr_scheduler import LRScheduler
 from sklearn.metrics import balanced_accuracy_score
 
 from .network import Network
 
-class Trainer():
+class NetworkHandler:
+    """
+    This encapsulates all computation logic for a neural network,
+    including training, validation, inference and embedding exxtraction.
+    
+    Supports mixed precision training.
+
+    Attributes
+    ----------
+    model: Network
+        The neural network.
+
+    criterion: nn.Module
+        The function for loss computation.
+
+    optimizer: torch.optim.Optimizer
+        The optimizer for gradient descent.
+
+    scheduler: LRScheduler
+        The learning rate scheduler.
+
+    freeze_encoder: bool
+        Whether the encoder is frozen.
+        Will be used as a flag in switching between train and eval modes.
+
+    device: str
+        The device for computations.
+
+    use_amp: bool
+        Whether to use mixed precision training.
+
+    grad_scaler: GradScaler
+        Scaler for mixed precision training.
+
+    embedding_mode: bool
+        Whether to perform computations on pre-extracted embeddings.
+    """
+
     def __init__(
         self,
         model: Network,
@@ -22,6 +60,33 @@ class Trainer():
         freeze_encoder: bool = True,
         embedding_mode: bool = False
         ):  
+
+        """
+        Parameters
+        ----------
+        model: Network
+            The neural network.
+
+        criterion: nn.Module
+            The function for loss computation.
+
+        optimizer: torch.optim.Optimizer
+            The optimizer for gradient descent.
+
+        scheduler: LRScheduler
+            The learning rate scheduler.
+
+        precision: str
+            Whether to train in mixed or full precision.
+            Must be one of ['full', 'mixed'].
+
+        freeze_encoder: bool
+            Whether the encoder is frozen.
+            Will be used as a flag in switching between train and eval modes.
+
+        embedding_mode: bool
+            Whether to perform computations on pre-extracted embeddings.
+        """
 
         valid_precisions = ["full", "mixed"]
 
@@ -41,6 +106,22 @@ class Trainer():
         self.embedding_mode = embedding_mode
             
     def train_epoch(self, train_loader: DataLoader) -> Tuple[float, float]:
+        """
+        Trains the model for 1 epoch.
+
+        Parameters
+        ----------
+        train_loader: DataLoader
+            The data loader for training.
+
+        Returns
+        -------
+        epoch_loss: float
+            The loss for the epoch.
+
+        epoch_balanced_accuracy: float
+            The average balanced accuracy for the given epoch.  
+        """
         
         metrics = {
             "running_loss": 0,
@@ -82,6 +163,22 @@ class Trainer():
     
     @torch.no_grad()
     def validate_epoch(self, val_loader: DataLoader) -> Tuple[float, float]:
+        """
+        Runs validation for 1 epoch.
+
+        Parameters
+        ----------
+        val_loader: DataLoader
+            The data loader for validation.
+
+        Returns
+        -------
+        epoch_loss: float
+            The loss for the epoch.
+
+        epoch_balanced_accuracy: float
+            The average balanced accuracy for the given epoch.  
+        """
 
         metrics = {
             "running_loss": 0,
@@ -112,3 +209,23 @@ class Trainer():
         epoch_balanced_accuracy = balanced_accuracy_score(metrics["targets"], metrics["predictions"])
 
         return epoch_loss, epoch_balanced_accuracy
+    
+    @torch.no_grad()
+    def extract_embeddings(
+        self, 
+        embed_loader: DataLoader,
+        deeplake_ds: DeepLakeDataset
+        ):
+        
+        self.model.eval()
+        pbar = tqdm(embed_loader, desc="Generating embeddings")
+        for patch, label, file_key in pbar:
+            patch = patch.to(self.device)
+            embedding = self.model.encoder(patch).detach().cpu()
+
+            deeplake_ds.append({
+                "embedding": embedding.numpy(),
+                "label": label.numpy(),
+                "file_key": file_key.numpy()
+            })
+            

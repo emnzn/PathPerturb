@@ -41,8 +41,8 @@ def main():
         train_ds.pytorch(transform=transform_fn),
         batch_size=args["batch_size"],
         shuffle=True,
-        pin_memory=True,
-        persistent_workers=True,
+        # pin_memory=True,
+        # persistent_workers=True,
         num_workers=(os.cpu_count() // 4)
         )
     
@@ -55,7 +55,7 @@ def main():
         test_ds.pytorch(transform=transform_fn),
         batch_size=args["batch_size"],
         shuffle=False,
-        pin_memory=True,
+        # pin_memory=True,
         persistent_workers=True,
         num_workers=(os.cpu_count() // 4)
         )

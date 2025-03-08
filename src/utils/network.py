@@ -8,7 +8,7 @@ from timm.models.vision_transformer import VisionTransformer
 
 class Network(nn.Module):
     """
-    Initializes the network with the foundation model as the encoder
+    Initializes the network with a foundation model as the encoder
     and a linear layer as the classifier.
 
     Parameters
@@ -31,7 +31,7 @@ class Network(nn.Module):
         self,
         encoder: str,
         encoder_dir: str,
-        num_classes: int,
+        num_classes: int = 2,
         freeze_encoder: bool = True
         ):
         super().__init__()

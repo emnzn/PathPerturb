@@ -3,10 +3,12 @@ dataset: gleason-grading
 
 encoder: uni
 num_classes: 5
+precision: mixed
 freeze_encoder: true
+embedding_mode: false
 
 epochs: 50
-batch_size: 100
+batch_size: 10
 eta_min: 1.0e-6
 weight_decay: 0.0
 learning_rate: 1.0e-4

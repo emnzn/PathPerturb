@@ -1,14 +1,3 @@
 encoder: uni
-batch_size: 100
-data_split: train
-apply_augmentation_range: false
-
-# augmentations
-brightness_min: 0 # [0, inf)
-brightness_max: 100 
-
-contrast_min: 0 # [0, inf)
-contrast_max: 100 
-
-saturation_min: 0 # [0, inf)
-saturation_max: 100 
+batch_size: 10000
+dataset: gleason-grading

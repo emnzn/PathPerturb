@@ -1,4 +1,5 @@
 import os
+import pickle
 from typing import Dict, Tuple, Any
 
 import torch
@@ -35,7 +36,8 @@ def get_dataset(
 
     if name == "pcam":
         base_transform = transforms.Compose([
-            transforms.ToTensor()
+            transforms.ToTensor(),
+            transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
         ])
         dataset = PCAM(data_dir, split=split, transform=base_transform)
 
