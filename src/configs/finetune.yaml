@@ -5,8 +5,8 @@ encoder: uni
 num_classes: 5
 freeze_encoder: true
 
-epochs: 1
-batch_size: 10000
+epochs: 50
+batch_size: 100
 eta_min: 1.0e-6
 weight_decay: 0.0
 learning_rate: 1.0e-4

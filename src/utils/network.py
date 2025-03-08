@@ -38,18 +38,25 @@ class Network(nn.Module):
 
         self.encoder = get_encoder(encoder, encoder_dir, "cpu")
         self.fc = get_classification_head(encoder, num_classes)
+        self.freeze_encoder = freeze_encoder
 
-        if freeze_encoder:
+        if self.freeze_encoder:
             for param in self.encoder.parameters():
                 param.requires_grad = False
             
             self.encoder.eval()
 
     def forward(self, x):
-        embedding = self.encoder(x)
+        if self.freeze_encoder:
+            with torch.no_grad():
+                embedding = self.encoder(x)
+
+        else:
+            embedding = self.encoder(x)
+            
         logits = self.fc(embedding)
 
-        return logits, embedding
+        return logits
 
 def download_weights(
     encoder: str,

@@ -5,6 +5,7 @@ from typing import Tuple
 import torch
 import torch.nn as nn
 from tqdm import tqdm
+from torch.amp import GradScaler
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
@@ -23,7 +24,9 @@ def train(
     criterion: nn.Module,
     optimizer: torch.optim.Optimizer, 
     model: Network,
-    device: str
+    device: str,
+    use_amp: bool,
+    grad_scaler: GradScaler
     ) -> Tuple[float, float]:
 
     """
@@ -46,6 +49,12 @@ def train(
     device: str
         One of [cuda, cpu].
 
+    use_amp: bool
+        Whether automatic mixed precision will be used.
+
+    grad_scaler: GradScaler
+        The scaler to prevent vanishing gradients in mixed precision training.
+
     Returns
     -------
     epoch_loss: float
@@ -66,11 +75,13 @@ def train(
         img = img.to(device)
         target =  target.to(device)
 
-        logits, _ = model(img)
-        loss = criterion(logits, target)
+        with torch.autocast(device_type=device, dtype=torch.float16, enabled=use_amp):
+            logits, _ = model(img)
+            loss = criterion(logits, target)
 
-        loss.backward()
-        optimizer.step()
+        grad_scaler.scale(loss).backward()
+        grad_scaler.step(optimizer)
+        grad_scaler.update()
         optimizer.zero_grad()
 
         confidence = F.softmax(logits, dim=1)
@@ -90,7 +101,8 @@ def validate(
     dataloader: DataLoader,
     criterion: nn.Module,
     model: Network,
-    device: str
+    device: str,
+    use_amp: bool
     ):
 
     """
@@ -107,9 +119,10 @@ def validate(
     for img, target, *_ in tqdm(dataloader, desc="Validation in progress"):
         img = img.to(device)
         target = target.to(device)
-
-        logits, _ = model(img)
-        loss = criterion(logits, target)
+        
+        with torch.autocast(device_type=device, dtype=torch.float16, enabled=use_amp):
+            logits, _ = model(img)
+            loss = criterion(logits, target)
 
         confidence = F.softmax(logits, dim=1)
         pred = torch.argmax(confidence, dim=1)
@@ -143,18 +156,36 @@ def main():
         split="train", 
         data_dir=data_dir
         )
-        
+    
     val_dataset = get_dataset(
         name=args["dataset"], 
         split="val" if args["dataset"] != "gleason-grading" else "test", 
         data_dir=data_dir
         )
 
-    train_loader = DataLoader(train_dataset, batch_size=args["batch_size"], shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=args["batch_size"], shuffle=False)
+    train_loader = DataLoader(
+        train_dataset, 
+        batch_size=args["batch_size"], 
+        shuffle=True, 
+        pin_memory=True,
+        persistent_workers=True,
+        num_workers=(os.cpu_count() // 4)
+        )
+    
+    val_loader = DataLoader(
+        val_dataset, 
+        batch_size=args["batch_size"], 
+        shuffle=False,
+        pin_memory=True,
+        persistent_workers=True,
+        num_workers=(os.cpu_count() // 4)
+        )
     
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = Network(args["encoder"], encoder_dir, args["num_classes"], args["freeze_encoder"]).to(device)
+
+    use_amp = device == "cuda"
+    grad_scaler = GradScaler(enabled=use_amp)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=args["learning_rate"], weight_decay=args["weight_decay"])
@@ -170,7 +201,9 @@ def main():
             criterion=criterion, 
             optimizer=optimizer, 
             model=model, 
-            device=device
+            device=device,
+            use_amp=use_amp,
+            grad_scaler=grad_scaler
             )
         
         log_metrics(
