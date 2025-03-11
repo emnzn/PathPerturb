@@ -20,26 +20,45 @@ def main():
     args = get_args(arg_path)
     num_workers = 0 if args["dataset"] == "pcam" else max(1, (os.cpu_count() // 4))
 
-    data_dir = os.path.join("..", "data")
+    data_dir = os.path.join("..", "embeddings" if args["embedding_mode"] else "data")
     encoder_dir = os.path.join("..", "assets", "model-weights", "pre-trained-weights")
     
-    log_dir = os.path.join("runs", args["dataset"], args["encoder"], f"experiment-{args['experiment_num']}")
+    log_dir = os.path.join(
+        "runs",
+        args["dataset"], 
+        args["encoder"], 
+        "embedding-mode" if args["embedding_mode"] else "full-model-mode", 
+        f"experiment-{args['experiment_num']}"
+    )
     writer = SummaryWriter(log_dir)
     save_args(args, log_dir)
     
-    model_dir = os.path.join("..", "assets", "model-weights", "finetune-weights", args["dataset"], args["encoder"], f"experiment-{args['experiment_num']}")
+    model_dir = os.path.join(
+        "..", 
+        "assets", 
+        "model-weights", 
+        "finetune-weights", 
+        args["dataset"], 
+        args["encoder"], 
+        "embedding-mode" if args["embedding_mode"] else "full-model-mode", 
+        f"experiment-{args['experiment_num']}"
+    )
     os.makedirs(model_dir, exist_ok=True)
 
     train_dataset = get_dataset(
         name=args["dataset"], 
         split="train", 
-        data_dir=data_dir
+        data_dir=data_dir,
+        embedding_mode=args["embedding_mode"],
+        encoder=args["encoder"]
     )
     
     val_dataset = get_dataset(
         name=args["dataset"], 
         split="val" if args["dataset"] != "gleason-grading" else "test", 
-        data_dir=data_dir
+        data_dir=data_dir,
+        embedding_mode=args["embedding_mode"],
+        encoder=args["encoder"]
     )
 
     train_loader = DataLoader(

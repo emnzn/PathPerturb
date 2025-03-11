@@ -5,5 +5,6 @@ data/
 *.pth
 *.log
 *.parquet
+embeddings/
 experiments/
 __pycache__/

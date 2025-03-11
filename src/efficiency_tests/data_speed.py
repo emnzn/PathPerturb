@@ -40,11 +40,8 @@ def main():
     train_loader = DataLoader(
         train_ds.pytorch(transform=transform_fn),
         batch_size=args["batch_size"],
-        shuffle=True,
-        # pin_memory=True,
-        # persistent_workers=True,
-        num_workers=(os.cpu_count() // 4)
-        )
+        shuffle=True
+    )
     
     print("Train set Loading:")
     load_speedtest(train_loader)
@@ -54,11 +51,8 @@ def main():
     test_loader = DataLoader(
         test_ds.pytorch(transform=transform_fn),
         batch_size=args["batch_size"],
-        shuffle=False,
-        # pin_memory=True,
-        persistent_workers=True,
-        num_workers=(os.cpu_count() // 4)
-        )
+        shuffle=False
+    )
     
     print("Test set Loading:")
     load_speedtest(test_loader)

@@ -13,8 +13,8 @@ def log_metrics(
     """
 
     print(f"{prefix} Statistics:")
-    writer.add_scalar(f"{prefix}/Loss", loss, epoch)
-
     print(f"Loss: {loss:.4f} | Balanced Accuracy: {performance:.4f}\n")
+
+    writer.add_scalar(f"{prefix}/Loss", loss, epoch)
     writer.add_scalar(f"{prefix}/Balanced-Accuracy", performance, epoch)
     

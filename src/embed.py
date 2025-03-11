@@ -48,11 +48,11 @@ def main():
         shuffle=False
     )
 
-    train_ds = deeplake.create(os.path.join(dest_dir, "train"))
+    train_ds = deeplake.create(os.path.join(f"file://{dest_dir}", "train"))
     val_ds = deeplake.create(os.path.join(
-        dest_dir, 
+        f"file://{dest_dir}", 
         "val" if args["dataset"] != "gleason-grading" else "test"
-        ))
+    ))
 
     train_ds.add_column("embedding", dtype=deeplake.types.Embedding(embedding_dim))
     train_ds.add_column("label", dtype= deeplake.types.Int32)

@@ -43,8 +43,6 @@ class Network(nn.Module):
         if self.freeze_encoder:
             for param in self.encoder.parameters():
                 param.requires_grad = False
-            
-            self.encoder.eval()
 
     def forward(self, x):
         if self.freeze_encoder:

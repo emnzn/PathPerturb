@@ -3,9 +3,9 @@ dataset: gleason-grading
 
 encoder: uni
 num_classes: 5
-precision: mixed
+precision: full
 freeze_encoder: true
-embedding_mode: false
+embedding_mode: true
 
 epochs: 50
 batch_size: 10

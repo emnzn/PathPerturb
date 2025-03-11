@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Literal
 
 import torch
 import torch.nn as nn
@@ -14,7 +14,7 @@ from .network import Network
 
 class NetworkHandler:
     """
-    This encapsulates all computation logic for a neural network,
+    This class encapsulates all computation logic for a given neural network,
     including training, validation, inference and embedding exxtraction.
     
     Supports mixed precision training.
@@ -56,7 +56,7 @@ class NetworkHandler:
         criterion: nn.Module = None,
         optimizer: torch.optim.Optimizer = None, 
         scheduler: LRScheduler = None,
-        precision: str = "full",
+        precision: Literal["full", "mixed"] = "full",
         freeze_encoder: bool = True,
         embedding_mode: bool = False
         ):  
@@ -76,7 +76,7 @@ class NetworkHandler:
         scheduler: LRScheduler
             The learning rate scheduler.
 
-        precision: str
+        precision: Literal["full", "mixed"]
             Whether to train in mixed or full precision.
             Must be one of ['full', 'mixed'].
 
@@ -104,6 +104,9 @@ class NetworkHandler:
         self.grad_scaler = GradScaler(enabled=self.use_amp)
         self.model = self.model.to(self.device)
         self.embedding_mode = embedding_mode
+
+        if self.device != "cuda" and precision == "mixed":
+            raise ValueError(f"Mixed precision unavailable with current device: {self.device}. Switch to full precision.\n")
             
     def train_epoch(self, train_loader: DataLoader) -> Tuple[float, float]:
         """
@@ -130,7 +133,7 @@ class NetworkHandler:
         }
         
         self.model.train()
-        if self.freeze_encoder: self.model.encoder.eval()
+        if self.freeze_encoder or self.embedding_mode: self.model.encoder.eval()
 
         pbar = tqdm(train_loader, desc="Training in progress")
 
@@ -222,10 +225,9 @@ class NetworkHandler:
         for patch, label, file_key in pbar:
             patch = patch.to(self.device)
             embedding = self.model.encoder(patch).detach().cpu()
-
+            
             deeplake_ds.append({
                 "embedding": embedding.numpy(),
                 "label": label.numpy(),
                 "file_key": file_key.numpy()
             })
-            
