@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+from torch.optim.lr_scheduler import CosineAnnealingLR
 
 from utils import (
     get_args,
@@ -82,7 +83,7 @@ def main():
     model = Network(args["encoder"], encoder_dir, args["num_classes"], args["freeze_encoder"])
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=args["learning_rate"], weight_decay=args["weight_decay"])
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, args["epochs"], eta_min=args["eta_min"])
+    scheduler = CosineAnnealingLR(optimizer, args["epochs"], eta_min=args["eta_min"])
 
     network_handler = NetworkHandler(
         model=model,

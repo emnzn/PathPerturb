@@ -7,9 +7,12 @@ import deeplake
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 
-from utils import get_args, transform_fn
+from utils import get_args, img_transform_fn
 
 def init_speedtest(data_dir):
+    """
+    Initializes a dataset whilst timing its speed of initialization.
+    """
     start = time.time()
     dataset = deeplake.open(data_dir)
     total_time = time.time() - start
@@ -19,6 +22,10 @@ def init_speedtest(data_dir):
     return dataset
 
 def load_speedtest(loader):
+    """
+    Iterates through the entire dataset through a data loader and
+    timing the speed of the full iteration.
+    """
     start = time.time()
     
     for _ in tqdm(loader, desc="Speed test running"):
@@ -38,7 +45,7 @@ def main():
     print("Speed testing train set:")
     train_ds = init_speedtest(train_dir)
     train_loader = DataLoader(
-        train_ds.pytorch(transform=transform_fn),
+        train_ds.pytorch(transform=img_transform_fn),
         batch_size=args["batch_size"],
         shuffle=True
     )
@@ -49,7 +56,7 @@ def main():
     print("Speed testing test set:")
     test_ds = init_speedtest(test_dir)
     test_loader = DataLoader(
-        test_ds.pytorch(transform=transform_fn),
+        test_ds.pytorch(transform=img_transform_fn),
         batch_size=args["batch_size"],
         shuffle=False
     )

@@ -219,6 +219,22 @@ class NetworkHandler:
         embed_loader: DataLoader,
         deeplake_ds: DeepLakeDataset
         ):
+        """
+        Extracts and saves embeddings in a deep lake dataset.
+
+        Assumes the existence of three inputs:
+            - image patch
+            - label
+            - file key (an index that maps to a file to trace each embedding back to the original image)
+
+        Parameters
+        ----------
+        embed_loader: DataLoader
+            The data loader to iterate throught the dataset.
+
+        deeplake_ds: DeepLakeDataset
+            The deeplake dataset to store the embeddings.
+        """
         
         self.model.eval()
         pbar = tqdm(embed_loader, desc="Generating embeddings")
