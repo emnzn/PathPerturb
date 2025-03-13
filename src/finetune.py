@@ -7,6 +7,14 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
+from utils.constants import (
+    RUN_DIR,
+    DATA_DIR, 
+    ASSET_DIR, 
+    CONFIG_DIR,
+    EMBEDDING_DIR 
+)
+
 from utils import (
     get_args,
     save_args,
@@ -17,15 +25,15 @@ from utils import (
 )
 
 def main():
-    arg_path = os.path.join("configs", "finetune.yaml")
+    arg_path = os.path.join(CONFIG_DIR, "finetune.yaml")
     args = get_args(arg_path)
     num_workers = 0 if args["dataset"] == "pcam" else max(1, (os.cpu_count() // 4))
 
-    data_dir = os.path.join("..", "embeddings" if args["embedding_mode"] else "data")
-    encoder_dir = os.path.join("..", "assets", "model-weights", "pre-trained-weights")
+    data_dir = EMBEDDING_DIR if args["embedding_mode"] else DATA_DIR
+    encoder_dir = os.path.join(ASSET_DIR, "model-weights", "pre-trained-weights")
     
     log_dir = os.path.join(
-        "runs",
+        RUN_DIR,
         args["dataset"], 
         args["encoder"], 
         "embedding-mode" if args["embedding_mode"] else "full-model-mode", 
@@ -35,8 +43,7 @@ def main():
     save_args(args, log_dir)
     
     model_dir = os.path.join(
-        "..", 
-        "assets", 
+        ASSET_DIR, 
         "model-weights", 
         "finetune-weights", 
         args["dataset"], 

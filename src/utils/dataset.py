@@ -1,5 +1,12 @@
 import os
-from typing import Dict, Tuple, Literal, Any
+from typing import (
+    Dict, 
+    Tuple, 
+    Literal, 
+    Callable, 
+    Optional,
+    Any
+)
 
 import torch
 import deeplake
@@ -37,12 +44,52 @@ def embedding_transform_fn(row: Dict[str, Any]) -> Tuple[torch.Tensor]:
 
     return embedding, label, file_key
 
+def get_split_dir(
+    name: Literal["pcam", "gleason-grading"], 
+    split: Literal["train", "val", "test"], 
+    data_dir: str, 
+    encoder: Literal["uni", "gigapath", "virchow"] = None, 
+    embedding_mode: bool = False
+    ) -> str:
+    
+    if embedding_mode:
+        split_dir = os.path.join(data_dir, name, encoder, split)
+
+    else:
+        split_dir = os.path.join(data_dir, name, split)
+
+    return split_dir
+
+def get_transform_fn(
+    name: str,
+    embedding_mode: bool,
+    custom_transform_fn: Optional[Callable] = None
+    ) -> Callable:
+    
+    if custom_transform_fn is not None:
+        return custom_transform_fn
+
+    if embedding_mode:
+        return embedding_transform_fn
+    
+
+    if name == "pcam":
+        return transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
+        ])
+
+    if name == "gleason-grading":
+        return img_transform_fn
+
+
 def get_dataset(
     name: Literal["pcam", "gleason-grading"],
     split: Literal["train", "val", "test"],
     data_dir: str,
-    embedding_mode: bool,
-    encoder: Literal["uni", "gigapath", "virchow"] = None
+    embedding_mode: bool = False,
+    encoder: Literal["uni", "gigapath", "virchow"] = None,
+    custom_transform_fn: Optional[Callable] = None
     ) -> Dataset:
 
     """
@@ -56,30 +103,27 @@ def get_dataset(
     valid_datasets = ["pcam", "gleason-grading"]
     if name not in valid_datasets: raise ValueError(f"name must be one of {valid_datasets}")
 
-    match name:
-        case "pcam":
-            if embedding_mode:
-                dataset = deeplake.open_read_only(data_dir).pytorch(transform=embedding_transform_fn)
+    split_dir = get_split_dir(
+        data_dir=data_dir,
+        name=name,
+        split=split,
+        encoder=encoder,
+        embedding_mode=embedding_mode
+    )
+    
+    if not os.path.isdir(split_dir): 
+        raise InvalidSplitError(f"{split} set cannot be found in path {os.path.dirname(split_dir)}.")
+    
+    transform_fn = get_transform_fn(name, embedding_mode, custom_transform_fn)
 
-            else:
-                base_transform = transforms.Compose([
-                    transforms.ToTensor(),
-                    transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
-                ])
-                dataset = PCAM(data_dir, split=split, transform=base_transform)
+    if name == "pcam":
+        if embedding_mode:
+            dataset = deeplake.open_read_only(data_dir).pytorch(transform=transform_fn)
 
-        case "gleason-grading":
-            transform_fn = embedding_transform_fn if embedding_mode else img_transform_fn
-            
-            if embedding_mode:
-                split_dir = os.path.join(data_dir, name, encoder, split)
+        else:
+            dataset = PCAM(data_dir, split=split, transform=transform_fn)
 
-            else:
-                split_dir = os.path.join(data_dir, name, split)
-
-            if not os.path.isdir(split_dir): 
-                raise InvalidSplitError(f"{split} set cannot be found in path {os.path.dirname(split_dir)}.")
-
-            dataset = deeplake.open_read_only(split_dir).pytorch(transform=transform_fn)
+    if name == "gleason-grading":
+        dataset = deeplake.open_read_only(split_dir).pytorch(transform=transform_fn)
     
     return dataset

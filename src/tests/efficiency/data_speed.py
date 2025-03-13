@@ -1,13 +1,15 @@
 import os
 import sys
 import time
-sys.path.append("../")
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import deeplake
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 
 from utils import get_args, img_transform_fn
+from utils.constants import DATA_DIR, CONFIG_DIR
 
 def init_speedtest(data_dir):
     """
@@ -35,10 +37,10 @@ def load_speedtest(loader):
     return total_time
     
 def main():
-    arg_dir = os.path.join("..", "configs", "speed-test.yaml")
+    arg_dir = os.path.join(CONFIG_DIR, "speed-test.yaml")
     args = get_args(arg_dir)
 
-    data_dir = os.path.join("..", "..", "data", args["dataset"])
+    data_dir = os.path.join(DATA_DIR, args["dataset"])
     train_dir = os.path.join(data_dir, "train")
     test_dir = os.path.join(data_dir, "test")
     
