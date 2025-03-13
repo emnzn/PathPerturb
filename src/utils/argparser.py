@@ -43,30 +43,3 @@ def save_args(
     path = os.path.join(dest_dir, "run-config.yaml")
     with open(path, "w") as f:
         yaml.dump(args, f)
-
-def get_transform_range(args: Dict[str, Union[float, str]]) -> np.ndarray:
-    """
-    Gets the range of transformation intensities to iterate over.
-
-    Parameters
-    ----------
-    args: Dict[str, Union[float, str]]
-        The inference arguments.
-
-    Returns
-    -------
-    transform_range: np.ndarray
-        The range of transformation intensities to be applied to the dataset.
-    """
-
-    step = args["augmentation_step"]
-    maximum = args["augmentation_max"]
-    minimum = args["augmentation_min"]
-
-    transform_range = np.linspace(
-        minimum,
-        maximum,
-        int((maximum - minimum) / step)
-    )
-
-    return transform_range

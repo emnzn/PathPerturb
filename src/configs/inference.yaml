@@ -1,8 +1,0 @@
-encoder: uni
-num_classes: 2
-
-batch_size: 10000
-augmentation_mode: brightness
-augmentation_min: 0
-augmentation_max: 25
-augmentation_step: 1
