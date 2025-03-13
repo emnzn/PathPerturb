@@ -87,7 +87,7 @@ def perturbation_fn(
 
 
 def main():
-    arg_path = os.path.join(CONFIG_DIR, "augment.yaml")
+    arg_path = os.path.join(CONFIG_DIR, "perturb.yaml")
     args = get_args(arg_path)
 
     encoder_dir = os.path.join(ASSET_DIR, "model-weights", "pre-trained-weights")
