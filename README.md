@@ -14,7 +14,7 @@ HF_TOKEN=YOUR_HF_TOKEN
 ```
 
 ### Supported tasks:
-- **Fine-tuning**: Supports finetuning `UNI`, `GigaPath`, and `Virchow` on the `PCAM` dataset.
+- **Fine-tuning**: Supports finetuning `UNI`, `GigaPath`, and `Virchow` on the `PCAM` and `AGGC2022` datasets.
 - **Embedding extraction**: Extracts embeddings into a DeepLake dataset class for downstream experiments and analysis.
 - **Dataset perturbation**: Distorts the image by a pre-defined percentage for downstream analysis.
 - **Inference**: Evaluate the robustness of the fine-tuned model on image perturbations.
