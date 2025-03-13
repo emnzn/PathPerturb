@@ -35,6 +35,10 @@ dataset: gleason-grading
 ## Extract Embeddings (without perturbations)
 Enter the `src` directory and run:
 ```bash
+# Enter src directory
+cd src/
+
+# Run embedding script
 python embed.py
 ```
 
@@ -60,8 +64,11 @@ learning_rate: 1.0e-4
 ```
 
 ## Fine-tune
-Enter the `src` directory and run:
 ```bash
+# Enter src directory
+cd src/
+
+#  Run fine-tuning script
 python finetune.py
 ```
 
@@ -83,5 +90,9 @@ perturbations:
 ## Perturbation Embedding Extraction
 Enter the `src/tests/perturbations` directory and run:
 ```bash
+# Enter perturbations directory
+cd src/tests/perturbations
+
+# Run script for perturbation embedding
 python embed_perturbation.py
 ```
