@@ -15,7 +15,7 @@ from .network import Network
 class NetworkHandler:
     """
     This class encapsulates all computation logic for a given neural network,
-    including training, validation, inference and embedding exxtraction.
+    including training, validation, inference and embedding extraction.
     
     Supports mixed precision training.
 
@@ -60,7 +60,6 @@ class NetworkHandler:
         freeze_encoder: bool = True,
         embedding_mode: bool = False
         ):  
-
         """
         Parameters
         ----------
