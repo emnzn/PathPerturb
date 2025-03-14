@@ -99,9 +99,9 @@ def main():
     embedding_dim = model.fc.head.in_features
 
     perturbation_type = args["perturbations"]["type"]
-    perturbation_start = args["perturbations"]["range"]["min"]
-    perturbation_end = args["perturbations"]["range"]["max"]
     perturbation_interval = args["perturbations"]["range"]["interval"]
+    perturbation_start = args["perturbations"]["range"]["min"]
+    perturbation_end = args["perturbations"]["range"]["max"] + perturbation_interval
 
     for strength in np.arange(perturbation_start, perturbation_end, perturbation_interval):
         custom_transform_fn = partial(perturbation_fn, perturbation_type=perturbation_type, alpha=strength)
