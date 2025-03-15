@@ -8,4 +8,4 @@ data/
 *.parquet
 embeddings/
 experiments/
-__pycache__/
+**/__pycache__/
