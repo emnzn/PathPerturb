@@ -11,6 +11,7 @@ from torch.optim.lr_scheduler import LRScheduler
 from sklearn.metrics import balanced_accuracy_score
 
 from .network import Network
+from .save import save_inference_table
 
 class NetworkHandler:
     """
@@ -198,7 +199,7 @@ class NetworkHandler:
                 logits = self.model.fc(patch) if self.embedding_mode else self.model(patch)
                 loss = self.criterion(logits, target)
 
-            confidence = torch.softmax(logits, dim=1)
+            confidence = F.softmax(logits, dim=1)
             pred = torch.argmax(confidence, dim=1)
 
             metrics["running_loss"] += loss.detach().cpu().item()
@@ -211,6 +212,77 @@ class NetworkHandler:
         epoch_balanced_accuracy = balanced_accuracy_score(metrics["targets"], metrics["predictions"])
 
         return epoch_loss, epoch_balanced_accuracy
+    
+    @torch.no_grad()
+    def inference(
+        self, 
+        inference_loader: DataLoader, 
+        save_dir: str = None,
+        save_filename: str = None
+        ) -> Tuple[float, float]:
+
+        """
+        Performs inference and optionally saves the results as a csv table
+        for downstream analysis.
+
+        Parameters
+        ----------
+        inference_loader: DataLoader
+            The data loader for inference.
+
+        save_dir: str
+            The directory to save results.
+
+        save_filename: str
+            The filename to save the results into.
+
+        Returns
+        -------
+        iteration_loss: float
+            The average loss during inference.
+
+        iteration_balanced_accuracy:
+            The average balanced accuracy during inference.
+        """
+
+        if save_dir and not save_filename:
+            raise ValueError("save_filename cannot be empty if save dir is specified.")
+        
+        if save_filename and not save_dir:
+            raise ValueError(f"save_dir must be provided to save results as {save_filename}")
+
+        metrics = {
+            "loss": [],
+            "predictions": [],
+            "targets": [],
+            "file_key": []
+        }
+
+        self.model.eval()
+        pbar = tqdm(inference_loader, desc="Inference in progress")
+        for patch, target, file_key in pbar:
+            patch = patch.to(self.device)
+            target = target.to(self.device)
+
+            with torch.autocast(device_type=self.device, dtype=torch.float16, enabled=self.use_amp):
+                logits = self.model.fc(patch) if self.embedding_mode else self.model(patch)
+                loss =  self.criterion(logits, target)
+
+            confidence = F.softmax(logits, dim=1)
+            pred = torch.argmax(confidence, dim=1)
+
+            metrics["loss"].extend(loss.detach().cpu().numpy())
+            metrics["predictions"].extend(pred.cpu().numpy())
+            metrics["targets"].extend(target.cpu().numpy())
+            metrics["file_key"].extend(file_key.cpu().numpy())
+
+        iteration_loss = sum(metrics["loss"]) / len(metrics["loss"])
+        iteration_balanced_accuracy = balanced_accuracy_score(metrics["targets"], metrics["predictions"])
+
+        if save_dir and save_filename:
+            save_inference_table(metrics, save_dir, save_filename)
+
+        return iteration_loss, iteration_balanced_accuracy
     
     @torch.no_grad()
     def extract_embeddings(

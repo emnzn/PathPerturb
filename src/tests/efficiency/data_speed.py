@@ -37,7 +37,7 @@ def load_speedtest(loader):
     return total_time
     
 def main():
-    arg_dir = os.path.join(CONFIG_DIR, "speed-test.yaml")
+    arg_dir = os.path.join(CONFIG_DIR, "data_speed.yaml")
     args = get_args(arg_dir)
 
     data_dir = os.path.join(DATA_DIR, args["dataset"])

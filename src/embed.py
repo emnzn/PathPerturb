@@ -5,9 +5,9 @@ from torch.utils.data import DataLoader
 
 from utils.constants import (
     DATA_DIR, 
-    ASSET_DIR, 
     CONFIG_DIR,
-    EMBEDDING_DIR 
+    EMBEDDING_DIR,
+    BASE_MODEL_DIR
 )
 
 from utils import (
@@ -21,7 +21,7 @@ def main():
     arg_path = os.path.join(CONFIG_DIR, "embed.yaml")
     args = get_args(arg_path)
 
-    encoder_dir = os.path.join(ASSET_DIR, "model-weights", "pre-trained-weights")
+    encoder_dir = os.path.join(BASE_MODEL_DIR, "pre-trained-weights")
     dest_dir = os.path.join(EMBEDDING_DIR, args["dataset"], args["encoder"])
     os.makedirs(dest_dir, exist_ok=True)
 

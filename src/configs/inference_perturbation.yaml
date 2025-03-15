@@ -1,0 +1,6 @@
+encoder: uni
+batch_size: 10
+precision: full
+experiment_num: 0
+dataset: gleason-grading
+perturbation_type: brightness

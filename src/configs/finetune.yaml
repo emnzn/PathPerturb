@@ -1,4 +1,4 @@
-experiment_num: 0
+experiment_num: 1
 dataset: gleason-grading
 
 encoder: uni

@@ -9,10 +9,10 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 
 from utils.constants import (
     RUN_DIR,
-    DATA_DIR, 
-    ASSET_DIR, 
+    DATA_DIR,  
     CONFIG_DIR,
-    EMBEDDING_DIR 
+    EMBEDDING_DIR,
+    BASE_MODEL_DIR 
 )
 
 from utils import (
@@ -30,7 +30,7 @@ def main():
     num_workers = 0 if args["dataset"] == "pcam" else max(1, (os.cpu_count() // 4))
 
     data_dir = EMBEDDING_DIR if args["embedding_mode"] else DATA_DIR
-    encoder_dir = os.path.join(ASSET_DIR, "model-weights", "pre-trained-weights")
+    encoder_dir = os.path.join(BASE_MODEL_DIR, "pre-trained-weights")
     
     log_dir = os.path.join(
         RUN_DIR,
@@ -43,8 +43,7 @@ def main():
     save_args(args, log_dir)
     
     model_dir = os.path.join(
-        ASSET_DIR, 
-        "model-weights", 
+        BASE_MODEL_DIR, 
         "finetune-weights", 
         args["dataset"], 
         args["encoder"], 

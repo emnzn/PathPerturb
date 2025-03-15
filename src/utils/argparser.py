@@ -2,8 +2,6 @@ import os
 import yaml
 from typing import Dict, Union
 
-import numpy as np
-
 def get_args(arg_path: str) -> Dict[str, Union[float, str]]:
     """
     Gets relevant arguments from a yaml file.

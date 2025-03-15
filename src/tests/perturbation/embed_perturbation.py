@@ -13,9 +13,9 @@ from torch.utils.data import DataLoader
 
 from utils.constants import (
     DATA_DIR,
-    ASSET_DIR,
     CONFIG_DIR,
-    EMBEDDING_DIR
+    EMBEDDING_DIR,
+    BASE_MODEL_DIR
 )
 
 from utils import (
@@ -53,10 +53,8 @@ def apply_perturbation(
         "brightness": adjust_brightness
     }
 
-    if perturbation_type in perturbations:
-        return perturbations[perturbation_type](img, alpha)
+    return perturbations[perturbation_type](img, alpha)
     
-    return img
 
 def perturbation_fn(
     row: Dict[str, Any], 
@@ -87,10 +85,10 @@ def perturbation_fn(
 
 
 def main():
-    arg_path = os.path.join(CONFIG_DIR, "perturb.yaml")
+    arg_path = os.path.join(CONFIG_DIR, "embed_perturbation.yaml")
     args = get_args(arg_path)
 
-    encoder_dir = os.path.join(ASSET_DIR, "model-weights", "pre-trained-weights")
+    encoder_dir = os.path.join(BASE_MODEL_DIR, "pre-trained-weights")
     dest_dir = os.path.join(EMBEDDING_DIR, args["dataset"], args["encoder"], "perturbations", args["perturbations"]["type"])
     os.makedirs(dest_dir, exist_ok=True)
 
