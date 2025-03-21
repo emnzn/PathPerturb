@@ -253,8 +253,9 @@ class NetworkHandler:
 
         metrics = {
             "loss": [],
-            "predictions": [],
-            "targets": [],
+            "confidence_score": [],
+            "prediction": [],
+            "target": [],
             "file_key": []
         }
 
@@ -266,18 +267,20 @@ class NetworkHandler:
 
             with torch.autocast(device_type=self.device, dtype=torch.float16, enabled=self.use_amp):
                 logits = self.model.fc(patch) if self.embedding_mode else self.model(patch)
-                loss =  self.criterion(logits, target)
+                loss = self.criterion(logits, target)
 
             confidence = F.softmax(logits, dim=1)
             pred = torch.argmax(confidence, dim=1)
+            target_confidence = torch.gather(confidence, dim=1, index=target.unsqueeze(1)).squeeze()
 
             metrics["loss"].extend(loss.detach().cpu().numpy())
-            metrics["predictions"].extend(pred.cpu().numpy())
-            metrics["targets"].extend(target.cpu().numpy())
+            metrics["confidence_score"].extend(target_confidence.cpu().numpy())
+            metrics["prediction"].extend(pred.cpu().numpy())
+            metrics["target"].extend(target.cpu().numpy())
             metrics["file_key"].extend(file_key.cpu().numpy())
 
         iteration_loss = sum(metrics["loss"]) / len(metrics["loss"])
-        iteration_balanced_accuracy = balanced_accuracy_score(metrics["targets"], metrics["predictions"])
+        iteration_balanced_accuracy = balanced_accuracy_score(metrics["target"], metrics["prediction"])
 
         if save_dir and save_filename:
             save_inference_table(metrics, save_dir, save_filename)

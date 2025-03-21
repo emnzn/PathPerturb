@@ -34,10 +34,10 @@ def adjust_brightness(
         raise ValueError(f"Alpha of value {alpha} is out of range. Ensure value is between -1.0 and 1.0.")
     
     if alpha > 0:
-        img = img + (abs(alpha) * (255 - img))
+        img = img + (alpha * (255 - img))
     
     if alpha < 0:
-        img = img - (abs(alpha) * (img - 0))
+        img = img + (alpha * img)
 
     img = np.clip(img, 0, 255).astype(np.uint8)
 
@@ -100,8 +100,9 @@ def main():
     perturbation_interval = args["perturbations"]["range"]["interval"]
     perturbation_start = args["perturbations"]["range"]["min"]
     perturbation_end = args["perturbations"]["range"]["max"] + perturbation_interval
+    perturbation_range = np.arange(perturbation_start, perturbation_end, perturbation_interval).round(4)
 
-    for strength in np.arange(perturbation_start, perturbation_end, perturbation_interval):
+    for strength in perturbation_range:
         custom_transform_fn = partial(perturbation_fn, perturbation_type=perturbation_type, alpha=strength)
 
         dataset = get_dataset(
@@ -118,14 +119,14 @@ def main():
         )
 
         perturbation_ds = deeplake.create(
-            os.path.join(f"file://{dest_dir}", f"{perturbation_type}_{strength:.4f}")
+            os.path.join(f"file://{dest_dir}", f"{perturbation_type}_{strength}")
         )
 
         perturbation_ds.add_column("embedding", dtype=deeplake.types.Embedding(embedding_dim))
         perturbation_ds.add_column("label", dtype= deeplake.types.Int32)
         perturbation_ds.add_column("file_key", dtype= deeplake.types.Int32)
 
-        print(f"{perturbation_type} strength: {strength:.4f}")
+        print(f"{perturbation_type} strength: {strength}")
         network_handler.extract_embeddings(data_loader, perturbation_ds)
 
 if __name__ == "__main__":
