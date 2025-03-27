@@ -68,7 +68,7 @@ def main():
         embedding_mode=True
     )
 
-    save_dir = os.path.join(RESULTS_DIR, args["dataset"], args["encoder"], "perturbations", args["perturbation_type"])
+    save_dir = os.path.join(RESULTS_DIR, args["dataset"], args["encoder"], "perturbations", args["perturbation_type"], "performance")
     os.makedirs(save_dir, exist_ok=True)
 
     perturbation_dir = os.path.join(EMBEDDING_DIR, args["dataset"], args["encoder"], "perturbations", args["perturbation_type"])
@@ -81,11 +81,11 @@ def main():
         inference_dataset = deeplake.open_read_only(ds_path).pytorch(transform=transform_fn)
         inference_loader = DataLoader(inference_dataset, batch_size=args["batch_size"], shuffle=False, num_workers=num_workers)
 
-        print(f"Evaluating {args['perturbation_type']} at {augmentation_strength}% intensity:")
+        print(f"Evaluating {args['perturbation_type']} at {augmentation_strength} intensity:")
         iteration_loss, iteration_balanced_accuracy = network_handler.inference(inference_loader, save_dir=save_dir, save_filename=ds)
         
         print(f"Loss: {iteration_loss:.4f} | Balanced Accuracy: {iteration_balanced_accuracy:.4f}\n")
-        print("-------------------------------------------------------------------\n")
+        print("\n-------------------------------------------------------------------\n")
 
 if __name__ == "__main__":
     main()

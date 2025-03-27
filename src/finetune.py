@@ -17,6 +17,7 @@ from utils.constants import (
 
 from utils import (
     get_args,
+    set_seed,
     save_args,
     get_dataset,
     log_metrics,
@@ -27,6 +28,8 @@ from utils import (
 def main():
     arg_path = os.path.join(CONFIG_DIR, "finetune.yaml")
     args = get_args(arg_path)
+    set_seed(args["seed"])
+    
     num_workers = 0 if args["dataset"] == "pcam" else max(1, (os.cpu_count() // 4))
 
     data_dir = EMBEDDING_DIR if args["embedding_mode"] else DATA_DIR

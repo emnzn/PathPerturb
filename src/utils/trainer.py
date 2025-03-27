@@ -271,10 +271,9 @@ class NetworkHandler:
 
             confidence = F.softmax(logits, dim=1)
             pred = torch.argmax(confidence, dim=1)
-            target_confidence = torch.gather(confidence, dim=1, index=target.unsqueeze(1)).squeeze()
 
             metrics["loss"].extend(loss.detach().cpu().numpy())
-            metrics["confidence_score"].extend(target_confidence.cpu().numpy())
+            metrics["confidence_score"].extend(confidence.cpu().numpy())
             metrics["prediction"].extend(pred.cpu().numpy())
             metrics["target"].extend(target.cpu().numpy())
             metrics["file_key"].extend(file_key.cpu().numpy())

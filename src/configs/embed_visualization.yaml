@@ -1,0 +1,10 @@
+encoder: uni
+dataset: gleason-grading
+
+seed: 42
+perturbation_type: brightness
+sample_percentage: 0.1
+
+# figure size
+height: 800
+width: 800

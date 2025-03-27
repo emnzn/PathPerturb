@@ -17,4 +17,4 @@ def save_inference_table(
     os.makedirs(save_dir, exist_ok=True)
 
     df = pd.DataFrame(data_dict)
-    df.to_csv(os.path.join(save_dir, f"{save_filename}.csv"), index=False)
+    df.to_parquet(os.path.join(save_dir, f"{save_filename}.parquet"), index=False)
